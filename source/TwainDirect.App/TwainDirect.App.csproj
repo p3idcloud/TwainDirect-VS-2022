@@ -1,0 +1,245 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProductVersion>15.0.27428.2005</ProductVersion>
+    <ImplicitlyExpandNETStandardFacades>false</ImplicitlyExpandNETStandardFacades>
+    <DisableHandlePackageFileConflicts>true</DisableHandlePackageFileConflicts>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{DE8AC167-CFF1-446D-9145-29179CA1B472}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>TwainDirect.App</RootNamespace>
+    <AssemblyName>TwainDirect.App</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>CODE_ANALYSIS;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\AnyCPU\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <OutputPath>bin\AnyCPU\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="TwainDirect.Support">
+      <HintPath>..\TwainDirect.Support\bin\AnyCPU\Debug\TwainDirect.Support.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="FormPassword.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormPassword.Designer.cs">
+      <DependentUpon>FormPassword.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormScan.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormScan.Designer.cs">
+      <DependentUpon>FormScan.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormSelect.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormSelect.Designer.cs">
+      <DependentUpon>FormSelect.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormSetup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormSetup.Designer.cs">
+      <DependentUpon>FormSetup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="lang_en_US.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>lang_en_US.resx</DependentUpon>
+    </Compile>
+    <Compile Include="lang_fr_FR.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>lang_fr_FR.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="FormPassword.resx">
+      <DependentUpon>FormPassword.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormScan.resx">
+      <DependentUpon>FormScan.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormSelect.resx">
+      <DependentUpon>FormSelect.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormSetup.resx">
+      <DependentUpon>FormSetup.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <EmbeddedResource Include="lang_fr_FR.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>lang_fr_FR.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="lang_en_US.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>lang_en_US.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.0">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.4.5">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 4.5</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="HazyBits.Twain.Cloud.Forms">
+      <Version>1.0.42</Version>
+    </PackageReference>
+    <PackageReference Include="WiX.Toolset">
+      <Version>3.9.1208</Version>
+    </PackageReference>
+  </ItemGroup>
+  <Import Project="MsBuildAL1073WarningWorkaround.targets" />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>echo Post-build actions...
+XCOPY "$(ProjectDir)data" "$(TargetDir)data" /i /e /y /q
+XCOPY "$(ProjectDir)..\TwainDirect.Scanner.TwainLocalManager\bin\$(PlatformName)\$(ConfigurationName)\data" "$(TargetDir)data" /i /e /y /q
+XCOPY "$(ProjectDir)..\TwainDirect.Scanner.TwainLocalManager\bin\$(PlatformName)\$(ConfigurationName)\TwainDirect.Scanner.TwainLocalManager.exe" "$(TargetDir)" /i /e /y /q
+XCOPY "$(ProjectDir)..\TwainDirect.Scanner.TwainLocalManager\bin\$(PlatformName)\$(ConfigurationName)\TwainDirect.Scanner.TwainLocalManager.exe.config" "$(TargetDir)" /i /e /y /q
+XCOPY "$(ProjectDir)..\TwainDirect.Scanner.TwainLocalManager\bin\$(PlatformName)\$(ConfigurationName)\BouncyCastle.Crypto.dll" "$(TargetDir)" /i /e /y /q
+XCOPY "$(ProjectDir)..\TwainDirect.Support\bin\$(PlatformName)\$(ConfigurationName)\libcrypto-*.dll" "$(TargetDir)" /i /e /y /q
+XCOPY "$(ProjectDir)..\TwainDirect.Support\bin\$(PlatformName)\$(ConfigurationName)\libssl-*.dll" "$(TargetDir)" /i /e /y /q
+XCOPY "$(ProjectDir)..\TwainDirect.Support\bin\$(PlatformName)\$(ConfigurationName)\pdfras_digitalsignature.dll" "$(TargetDir)" /i /e /y /q
+XCOPY "$(ProjectDir)..\TwainDirect.Support\bin\$(PlatformName)\$(ConfigurationName)\pdfras_encryption.dll" "$(TargetDir)" /i /e /y /q</PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>echo Pre-build actions...
+DEL /f /s /q "$(TargetDir)data"</PreBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

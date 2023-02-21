@@ -1,0 +1,116 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Test getSession
+; Exercise the getSession command.  We're going to do the following:
+; - confirm that getSession succeeds, and contains all required properties
+;
+; Arguments
+; arg:1 - [OUT] set tag to true, if done
+; arg:2 - [OUT] set tag to first imaage block, if we have one
+; arg:3 - state to test for
+; arg:4 - state to test for
+; arg:5 - state to test for
+;
+; Locals
+; getsessionresult - result of the test
+;
+; returns: pass or fail
+;
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Display the banner...
+;
+echo
+echo 'Test getSession v1.0 21-Jul-2017'
+set getsessionresult 'pass'
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Call getSession, and check the return properties...
+;
+call GETSESSION '${arg:1}' '${arg:2}' '${arg:3}' '${arg:4}' '${arg:5}'
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Bye-bye...
+;
+echopassfail 'SUMMARY' '${get:getsessionresult}'
+return '${get:getsessionresult}'
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; GETSESSION
+; arg:1 - [OUT] set tag to true, if done
+; arg:2 - [OUT] set tag to first imaage block, if we have one
+; arg:3 - state to test for
+; arg:4 - state to test for
+; arg:5 - state to test for
+; returns pass or fail
+;
+:GETSESSION
+;
+; Send the command...
+getSession
+;
+; Check the headers...
+run 'function CheckHeader' 'TL.NSCN.GETS.001' 'getsessionresult' 'Content-Type' ~contains 'application/json' 'charset=utf-8'
+run 'function CheckHeader' 'TL.NSCN.GETS.002' 'getsessionresult' 'Content-Length' == '${rdata:#}'
+;
+; Check the mandatory properties...
+run 'function CheckJsonProperty' 'TL.NSCN.GETS.003' 'getsessionresult' 'kind' == 'twainlocalscanner'
+run 'function CheckJsonProperty' 'TL.NSCN.GETS.004' 'getsessionresult' 'commandId'
+run 'function CheckJsonProperty' 'TL.NSCN.GETS.005' 'getsessionresult' 'method' == 'getSession'
+run 'function CheckJsonProperty' 'TL.NSCN.GETS.006' 'getsessionresult' 'results'
+run 'function CheckJsonProperty' 'TL.NSCN.GETS.007' 'getsessionresult' 'results.success' == 'true'
+run 'function CheckJsonProperty' 'TL.NSCN.GETS.008' 'getsessionresult' 'results.session'
+run 'function CheckJsonProperty' 'TL.NSCN.GETS.009' 'getsessionresult' 'results.session.sessionId' != ''
+run 'function CheckJsonProperty' 'TL.NSCN.GETS.010' 'getsessionresult' 'results.session.revision' != ''
+run 'function CheckJsonProperty' 'TL.NSCN.GETS.011' 'getsessionresult' 'results.session.state' == '${arg:3}' '${arg:4}' '${arg:5}'
+if '${get:getsessionresult}' != 'pass' goto GETSESSION.FAIL
+;
+; We're good, check if we need to output values...
+call RETURNVALUES '${arg:1}' '${arg:2}'
+return 'pass'
+;
+; No joy...
+:GETSESSION.FAIL
+set getsessionresult 'fail'
+return 'fail'
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; RETURNVALUES
+; arg1 - [OUT] set tag to true, if done
+; arg2 - [OUT] set tag to first imaage block, if we have one
+; return pass
+;
+:RETURNVALUES
+;
+; If we don't have arg:1, we're done...
+if '${arg:1}' == '' goto RETURNVALUES.DONE
+;
+; We're done if our state isn't capturing, draining, or closed,
+; or if the flag tells us we've drained the scanner...
+set '${arg:1}' true
+if '${rj:results.session.state}' == 'capturing' goto RETURNVALUES.GOODSTATE
+if '${rj:results.session.state}' == 'draining' goto RETURNVALUES.GOODSTATE
+if '${rj:results.session.state}' == 'closed' goto RETURNVALUES.GOODSTATE
+goto RETURNVALUES.DONE
+:RETURNVALUES.GOODSTATE
+if '${rj:results.session.imageBlocksDrained}' == 'true' goto RETURNVALUES.DONE
+set '${arg:1}' false
+;
+; If we don't have arg:2, we're done...
+if '${arg:2}' == '' goto RETURNVALUES.DONE
+;
+; Get the first image block, if there is one...
+set '${arg:2}' '${rj:results.session.imageBlocks[0]}'
+;
+; bye-bye...
+:RETURNVALUES.DONE
+return 'pass'

@@ -1,0 +1,105 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; TWAIN Direct Certification Script
+; This runs all of the tests needed to pass certification for TWAIN Direct.
+;
+; Arguments
+; arg:1 - scanner to test
+;
+; Locals
+; (none)
+;
+; returns: pass or fail
+;
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Figure out if we are TWAIN Local or TWAIN Cloud
+;
+if '${arg:0.1}' !~contains 'local:' goto MAIN.ISCLOUD
+set protocol Local
+goto MAIN.REPORTINITIALIZE
+:MAIN.ISCLOUD
+set protocol Cloud
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Run all of our tests, start by assuming success...
+;
+:MAIN.REPORTINITIALIZE
+report initialize
+echo 'TWAIN Direct Certification Script v1.0 15-Sep-2017'
+echo '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+echo 'program is ${program:}'
+echo 'started at ${localtime:yyyy-MM-dd/hh:mm:ss}'
+log info '#TWAIN Direct Certification v1.0 15-Sep-2017'
+log info '#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+log info '#program is ${program:}'
+log info '#started at ${localtime:yyyy-MM-dd/hh:mm:ss}'
+set certifyresulttwaindirect pass
+; !!!TBD!!! we need this until the cloud is fixed
+if '${get:protocol}' == 'Cloud' goto MAIN.SKIPJSON
+call CERTIFY 'JSON Syntax' '${arg:1}'
+:MAIN.SKIPJSON
+call CERTIFY 'Configure Task Topology' '${arg:1}'
+call CERTIFY 'Exception Handling' '${arg:1}'
+call CERTIFY 'Vendor Handling' '${arg:1}'
+call CERTIFY 'Check Values' '${arg:1}'
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; How did we do?
+;
+if '${get:certifyresulttwaindirect}' != 'pass' goto MAIN.FAIL
+echo
+echo
+echo 'ended at ${localtime:yyyy-MM-dd/hh:mm:ss}'
+echo.green '*****************************************************'
+echo.green 'The scanner passed TWAIN Direct Certification (${get:protocol})'
+echo.green '*****************************************************'
+log info '#'
+log info '#'
+log info '#ended at ${localtime:yyyy-MM-dd/hh:mm:ss}'
+log info '#*****************************************************'
+log info '#The scanner passed TWAIN Direct Certification (${get:protocol})'
+log info '#*****************************************************'
+report save "TWAIN Direct Self Certification (${get:protocol}).rtf"
+echo 'report saved to ${report:}'
+return 'pass'
+;
+:MAIN.FAIL
+echo
+echo
+echo 'ended at ${localtime:yyyy-MM-dd/hh:mm:ss}'
+echo.red '***********************************************************'
+echo.red 'The scanner did not pass TWAIN Direct Certification (${get:protocol})'
+echo.red '***********************************************************'
+log info '#'
+log info '#'
+log info '#ended at ${localtime:yyyy-MM-dd/hh:mm:ss}'
+log error '#***********************************************************'
+log error '#The scanner did not pass TWAIN Direct Certification (${get:protocol})'
+log error '#***********************************************************'
+report save "TWAIN Direct Self Certification (${get:protocol}).rtf"
+echo 'report saved to ${report:}'
+return 'fail'
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Function: Certify
+; arg:1 - script to run
+; arg:2 - scanner to test
+; returns: pass or fail
+;
+:CERTIFY
+;
+run '${arg:1}' '${arg:2}'
+if '${ret:}' != 'pass' goto CERTIFY.FAIL
+return 'pass'
+;
+:CERTIFY.FAIL
+set certifyresulttwaindirect fail
+return 'fail'

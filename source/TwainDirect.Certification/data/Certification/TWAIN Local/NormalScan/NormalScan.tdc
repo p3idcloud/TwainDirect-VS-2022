@@ -1,0 +1,222 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; TWAIN Direct Scan
+; Scan using TWAIN Direct, exercise and test as much of the system as possible...
+;
+; Arguments
+; arg:1 - scanner to use
+; arg:2 - [OPTIONAL] task (default task is used)
+; arg:3 - [OPTIONAL] get thumbnail with readImageBlockMetadata (default false)
+; arg:4 - [OPTIONAL] get metadata with readImageBlock (default false)
+;
+; Locals
+; getThumbnail - true if we should ask for thumbnails with the metadata
+; getMetadata - true if we should ask for metadata with the image
+; sendstopcapturing - used to send stopCapturing after the first image
+;
+; returns: pass or fail
+;
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Display the banner...
+;
+echo.yellow
+echo.yellow
+echo.yellow
+echo.yellow '********************************************************************************'
+echo.yellow 'Normal Scan v1.0 15-Sep-2017'
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Instructions to the user...
+;
+echo.yellow
+echo.yellow
+echo.yellow
+echo.yellow 'This test performs a normal scan.  If using a flatbed place a sheet'
+echo.yellow 'of paper on it.  If using an automatic document feeder, multiple'
+echo.yellow 'sheets must be used.  stopCapturing will be issued after the first'
+echo.yellow 'image is transferred, so not all of the sheets will be scanned.'
+echo.yellow
+echo.yellow 'When ready, type "y" and press the Enter key.'
+echo.yellow
+input 'Is the scanner ready? ' 'Y' 'A'
+if '${ret:}' ~~ 'A' goto MAIN.FAIL
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Work out values for getThumbnail and getMetadata...
+;
+; Work out a value for getThumbnail...
+set getThumbnail '${arg:3}'
+if '${get:getThumbnail}' != '' goto MAIN.SKIPTHUMBNAILDEFAULT
+set getThumbnail 'false'
+:MAIN.SKIPTHUMBNAILDEFAULT
+;
+; Work out a value for getMetadata...
+set getMetadata '${arg:4}'
+if '${get:getMetadata}' != '' goto MAIN.SKIPMETADATADEFAULT
+set getMetadata 'false'
+:MAIN.SKIPMETADATADEFAULT
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Clean our images folder...
+;
+clean
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Pick a scanner...
+;
+select '${arg:1}'
+if '${ret:}' != 'true' goto MAIN.FAIL
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Collect info on our scanner (this gets our X-Privet-Token)...
+;
+infoex
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Test createSession...
+;
+run 'test createSession'
+if '${ret:}' != 'pass' goto MAIN.FAIL
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Test getSession...
+;
+run 'test getSession' '' '' 'ready' ''
+if '${ret:}' != 'pass' goto MAIN.FAIL
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Test sendTask...
+;
+run 'test sendTask' '${arg:2}'
+if '${ret:}' != 'pass' goto MAIN.FAIL
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Test startCapturing...
+;
+run 'test startCapturing'
+if '${ret:}' != 'pass' goto MAIN.FAIL
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Scan until the scanner stops giving us images...
+;
+set sendstopcapturing 'true'
+:MAIN.WAIT
+	echo
+
+; Loop here until we see an image, or scanning ends...
+:MAIN.WAITNEXT
+
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	; Test getSession...
+	; Note the states, we'll start in capturing, after we send
+	; stopCapturing we'll go to draining or ready.  If we go to
+	; ready we expect outDone to be true...
+	;
+	run 'test getSession' 'outDone' 'outNextimageblock' 'capturing' 'draining' 'ready'
+	if '${ret:}' != 'pass' goto MAIN.FAIL
+	if '${get:outDone}' == 'true' goto MAIN.DONE
+	if '${get:outNextimageblock}' != '' goto MAIN.GETIMAGE
+	sleep 1000
+
+goto MAIN.WAITNEXT
+
+; Keep getting images as long as we have some, go back to
+; waiting if we're fast enough to drain the scanner's buffers...
+:MAIN.GETIMAGE
+
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	; Test readImageBlockMetadata, unless we're told to skip it...
+	;
+	if '${get:getMetadata}' == 'true' goto MAIN.SKIPREADBLOCKMETADATA
+	run 'test readImageBlockMetadata' '${get:outNextimageblock}' '${get:getThumbnail}' 'capturing' 'draining'
+	if '${ret:}' != 'pass' goto MAIN.FAIL
+	:MAIN.SKIPREADBLOCKMETADATA
+
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	; Test readImageBlock...
+	;
+	run 'test readImageBlock' '${get:outNextimageblock}' '${get:getMetadata}' 'capturing' 'draining'
+	if '${ret:}' != 'pass' goto MAIN.FAIL
+
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	; Test releaseImageBlocks...
+	;
+	run 'test releaseImageBlocks' '${get:outNextimageblock}' '${get:outNextimageblock}' 'outDone' 'outNextimageblock' 'capturing' 'draining' 'ready'
+	if '${ret:}' != 'pass' goto MAIN.FAIL
+	if '${get:outDone}' == 'true' goto MAIN.DONE
+	if '${get:outNextimageblock}' == '' goto MAIN.WAIT
+
+	;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	; Test stopCapturing (but only once)...
+	;
+	if '${get:sendstopcapturing}' != 'true' goto MAIN.SKIPSTOPCAPTURING
+		set sendstopcapturing 'false'
+		run 'test stopCapturing' 'outDone' 'draining' 'ready'
+		if '${ret:}' != 'pass' goto MAIN.FAIL
+		if '${get:outDone}' == 'true' goto :MAIN.DONE
+	:MAIN.SKIPSTOPCAPTURING
+
+goto MAIN.GETIMAGE
+:MAIN.DONE
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Test closeSession...
+; Depending on how fast the scanner is, we may go to a closed state
+; or a noSession state, and that's okay. 
+;
+run 'test closeSession' 'closed' 'noSession'
+if '${ret:}' != 'pass' goto MAIN.FAIL
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Test PDF/raster, this command goes into the images folder and
+; validated every .pdf file...
+;
+run 'test pdfraster' '${arg:1}'
+if '${ret:}' != 'pass' goto MAIN.FAIL
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Bye-bye...
+;
+echo
+echopassfail 'FINAL SUMMARY' 'pass'
+return pass
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; MAIN.FAIL
+;
+:MAIN.FAIL
+stopCapturing
+closeSession
+echo
+echopassfail 'FINAL SUMMARY' 'fail'
+return 'fail'

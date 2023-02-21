@@ -1,0 +1,76 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Test stopCapturing
+; Exercise the stopCapturing command.  We're going to do the following:
+; - confirm that stopCapturing succeeds, and contains all required properties
+;
+; Arguments
+; arg:1 - [OUT] set tag to true, if done
+; arg:2 - state to check for
+; arg:3 - state to check for
+;
+; Locals
+; stopcapturingresult - result of the test
+;
+; returns: pass or fail
+;
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Display the banner...
+;
+echo
+echo 'Test stopCapturing v1.0 21-Jul-2017'
+set stopcapturingresult 'pass'
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Call stopCapturing, and check the return properties...
+;
+call STOPCAPTURING '${arg:1}' '${arg:2}' '${arg:3}'
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Bye-bye...
+;
+echopassfail 'SUMMARY' '${get:stopcapturingresult}'
+return '${get:stopcapturingresult}'
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; STOPCAPTURING
+; arg:1 - [OUT] set tag to true, if done
+; arg:2 - state to check for
+; arg:3 - state to check for
+;
+:STOPCAPTURING
+;
+; Send the command...
+stopCapturing
+;
+; Check the headers...
+run 'function CheckHeader' 'TL.NSCN.STOP.001' 'stopcapturingresult' 'Content-Type' ~contains 'application/json' 'charset=utf-8'
+run 'function CheckHeader' 'TL.NSCN.STOP.002' 'stopcapturingresult' 'Content-Length' == '${rdata:#}'
+;
+; Check the mandatory properties...
+run 'function CheckJsonProperty' 'TL.NSCN.STOP.003' 'stopcapturingresult' 'kind' == 'twainlocalscanner'
+run 'function CheckJsonProperty' 'TL.NSCN.STOP.004' 'stopcapturingresult' 'commandId'
+run 'function CheckJsonProperty' 'TL.NSCN.STOP.005' 'stopcapturingresult' 'method' == 'stopCapturing'
+run 'function CheckJsonProperty' 'TL.NSCN.STOP.006' 'stopcapturingresult' 'results'
+run 'function CheckJsonProperty' 'TL.NSCN.STOP.007' 'stopcapturingresult' 'results.success' == 'true'
+run 'function CheckJsonProperty' 'TL.NSCN.STOP.008' 'stopcapturingresult' 'results.session'
+run 'function CheckJsonProperty' 'TL.NSCN.STOP.009' 'stopcapturingresult' 'results.session.sessionId' != ''
+run 'function CheckJsonProperty' 'TL.NSCN.STOP.010' 'stopcapturingresult' 'results.session.revision' != ''
+run 'function CheckJsonProperty' 'TL.NSCN.STOP.011' 'stopcapturingresult' 'results.session.state' == '${arg:2}' '${arg:3}'
+;
+; Are we drained?
+set '${arg:1}' true
+if '${rj:results.session.imageBlocksDrained}' == 'true' goto STOPCAPTURING.DRAINED
+set '${arg:1}' false
+:STOPCAPTURING.DRAINED
+;
+; Return the return...
+return '${get:stopcapturingresult}'

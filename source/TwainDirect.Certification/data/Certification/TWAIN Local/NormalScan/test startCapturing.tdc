@@ -1,0 +1,84 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Test startCapturing
+; Exercise the startCapturing command.  We're going to do the following:
+; - confirm that startCapturing, and contains all required properties
+; - confirm that startCapturing reports invalidState now
+;
+; Arguments
+; (none)
+;
+; Locals
+; startcapturingresult - result of the test
+;
+; returns: pass or fail
+;
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Display the banner...
+;
+echo
+echo 'Test startCapturing v1.0 21-Jul-2017'
+set startcapturingresult 'pass'
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Check the codes, we're looking for commands that must return busy and invalidState
+;
+run 'function CheckCode' 'TL.NSCN.STRT.001' 'startcapturingresult' 'createSession' 'busy'
+run 'function CheckCode' 'TL.NSCN.STRT.002' 'startcapturingresult' 'readImageBlockMetadata' 'invalidState' '1' 'false'
+run 'function CheckCode' 'TL.NSCN.STRT.003' 'startcapturingresult' 'readImageBlock' 'invalidState' '1' 'false'
+run 'function CheckCode' 'TL.NSCN.STRT.004' 'startcapturingresult' 'releaseImageBlocks' 'invalidState' '1' '1'
+run 'function CheckCode' 'TL.NSCN.STRT.005' 'startcapturingresult' 'stopCapturing' 'invalidState'
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Call startCapturing, and check the return properties...
+;
+call STARTCAPTURING
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Check the codes, we're looking for commands that must return busy and invalidState
+;
+run 'function CheckCode' 'TL.NSCN.STRT.017' 'startcapturingresult' 'createSession' 'busy'
+run 'function CheckCode' 'TL.NSCN.STRT.018' 'startcapturingresult' 'startCapturing' 'invalidState'
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Bye-bye...
+;
+echopassfail 'SUMMARY' '${get:startcapturingresult}'
+return '${get:startcapturingresult}'
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; STARTCAPTURING
+; returns pass or fail
+;
+:STARTCAPTURING
+;
+; Send the command...
+startCapturing
+;
+; Check the headers...
+run 'function CheckHeader' 'TL.NSCN.STRT.006' 'startcapturingresult' 'Content-Type' ~contains 'application/json' 'charset=utf-8'
+run 'function CheckHeader' 'TL.NSCN.STRT.007' 'startcapturingresult' 'Content-Length' == '${rdata:#}'
+;
+; Check the mandatory properties...
+run 'function CheckJsonProperty' 'TL.NSCN.STRT.008' 'startcapturingresult' 'kind' == 'twainlocalscanner'
+run 'function CheckJsonProperty' 'TL.NSCN.STRT.009' 'startcapturingresult' 'commandId'
+run 'function CheckJsonProperty' 'TL.NSCN.STRT.010' 'startcapturingresult' 'method' == 'startCapturing'
+run 'function CheckJsonProperty' 'TL.NSCN.STRT.011' 'startcapturingresult' 'results'
+run 'function CheckJsonProperty' 'TL.NSCN.STRT.012' 'startcapturingresult' 'results.success' == 'true'
+run 'function CheckJsonProperty' 'TL.NSCN.STRT.013' 'startcapturingresult' 'results.session'
+run 'function CheckJsonProperty' 'TL.NSCN.STRT.014' 'startcapturingresult' 'results.session.sessionId' != ''
+run 'function CheckJsonProperty' 'TL.NSCN.STRT.015' 'startcapturingresult' 'results.session.revision' != ''
+run 'function CheckJsonProperty' 'TL.NSCN.STRT.016' 'startcapturingresult' 'results.session.state' == 'capturing'
+return '${get:startcapturingresult}'

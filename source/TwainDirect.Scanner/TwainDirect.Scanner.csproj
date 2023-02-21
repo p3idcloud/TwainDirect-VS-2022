@@ -1,0 +1,243 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <ProductVersion>15.0.27428.2005</ProductVersion>
+    <ImplicitlyExpandNETStandardFacades>false</ImplicitlyExpandNETStandardFacades>
+    <DisableHandlePackageFileConflicts>true</DisableHandlePackageFileConflicts>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{F8463B8B-C0F9-46D2-86C5-053F3301DF2F}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>TwainDirect.Scanner</RootNamespace>
+    <AssemblyName>TwainDirect.Scanner</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\AnyCPU\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <OutputPath>bin\AnyCPU\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="pdfras_reader_managed, Version=1.0.8445.19070, Culture=neutral, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\pdfraster\bin\x64\Debug\pdfras_reader_managed.dll</HintPath>
+    </Reference>
+    <Reference Include="pdfras_writer_managed, Version=0.14.8445.19074, Culture=neutral, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\pdfraster\bin\x64\Debug\pdfras_writer_managed.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.ServiceProcess" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AboutBox.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AboutBox.Designer.cs">
+      <DependentUpon>AboutBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ConfirmScan.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ConfirmScan.Designer.cs">
+      <DependentUpon>ConfirmScan.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormMain.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormMain.Designer.cs">
+      <DependentUpon>FormMain.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormSelect.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormSelect.Designer.cs">
+      <DependentUpon>FormSelect.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FormSetup.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FormSetup.Designer.cs">
+      <DependentUpon>FormSetup.cs</DependentUpon>
+    </Compile>
+    <Compile Include="lang_en_US.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>lang_en_US.resx</DependentUpon>
+    </Compile>
+    <Compile Include="lang_fr_FR.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>lang_fr_FR.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Scanner.cs" />
+    <Compile Include="Service.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Storage\CloudContext.cs" />
+    <Compile Include="Storage\CloudScanner.cs" />
+    <Compile Include="Terminal.cs" />
+    <EmbeddedResource Include="AboutBox.resx">
+      <DependentUpon>AboutBox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ConfirmScan.resx">
+      <DependentUpon>ConfirmScan.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormMain.resx">
+      <DependentUpon>FormMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormSelect.resx">
+      <DependentUpon>FormSelect.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FormSetup.resx">
+      <DependentUpon>FormSetup.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <EmbeddedResource Include="lang_fr_FR.resx">
+      <SubType>Designer</SubType>
+      <LastGenOutput>lang_fr_FR.Designer.cs</LastGenOutput>
+      <Generator>PublicResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Include="lang_en_US.resx">
+      <LastGenOutput>lang_en_US.Designer.cs</LastGenOutput>
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Properties\Settings.settings">
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TwainDirect.Support\TwainDirect.Support.csproj">
+      <Project>{50d52482-9c72-45b3-9bcf-1e4b49976e48}</Project>
+      <Name>TwainDirect.Support</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="data\appdata.txt" />
+    <None Include="Resources\SystemTray.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="HazyBits.Twain.Cloud.Forms">
+      <Version>1.0.42</Version>
+    </PackageReference>
+    <PackageReference Include="SQLite.CodeFirst">
+      <Version>1.5.1.25</Version>
+    </PackageReference>
+    <PackageReference Include="System.Data.SQLite">
+      <Version>1.0.108</Version>
+    </PackageReference>
+    <PackageReference Include="WiX.Toolset">
+      <Version>3.9.1208</Version>
+    </PackageReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>echo Post-build actions...
+XCOPY "$(ProjectDir)data" "$(TargetDir)data" /i /e /y /q
+XCOPY "$(ProjectDir)..\TwainDirect.OnTwain\bin\$(PlatformName)\$(ConfigurationName)\data" "$(TargetDir)data" /i /e /y /q
+XCOPY "$(ProjectDir)..\TwainDirect.OnTwain\bin\$(PlatformName)\$(ConfigurationName)\TwainDirect.OnTwain.exe" "$(TargetDir)" /i /e /y /q
+XCOPY "$(ProjectDir)..\TwainDirect.OnTwain\bin\$(PlatformName)\$(ConfigurationName)\TwainDirect.OnTwain.exe.config" "$(TargetDir)" /i /e /y /q
+XCOPY "$(ProjectDir)..\TwainDirect.Scanner.TwainLocalManager\bin\$(PlatformName)\$(ConfigurationName)\data" "$(TargetDir)data" /i /e /y /q
+XCOPY "$(ProjectDir)..\TwainDirect.Scanner.TwainLocalManager\bin\$(PlatformName)\$(ConfigurationName)\TwainDirect.Scanner.TwainLocalManager.exe" "$(TargetDir)" /i /e /y /q
+XCOPY "$(ProjectDir)..\TwainDirect.Scanner.TwainLocalManager\bin\$(PlatformName)\$(ConfigurationName)\TwainDirect.Scanner.TwainLocalManager.exe.config" "$(TargetDir)" /i /e /y /q
+XCOPY "$(ProjectDir)..\TwainDirect.Scanner.TwainLocalManager\bin\$(PlatformName)\$(ConfigurationName)\BouncyCastle.Crypto.dll" "$(TargetDir)" /i /e /y /q
+XCOPY "$(ProjectDir)..\TwainDirect.Support\bin\$(PlatformName)\$(ConfigurationName)\libcrypto-*.dll" "$(TargetDir)" /i /e /y /q
+XCOPY "$(ProjectDir)..\TwainDirect.Support\bin\$(PlatformName)\$(ConfigurationName)\libssl-*.dll" "$(TargetDir)" /i /e /y /q
+XCOPY "$(ProjectDir)..\TwainDirect.Support\bin\$(PlatformName)\$(ConfigurationName)\pdfras_digitalsignature.dll" "$(TargetDir)" /i /e /y /q
+XCOPY "$(ProjectDir)..\TwainDirect.Support\bin\$(PlatformName)\$(ConfigurationName)\pdfras_encryption.dll" "$(TargetDir)" /i /e /y /q
+XCOPY "$(ProjectDir)..\TwainDirect.Support\bin\$(PlatformName)\$(ConfigurationName)\certificate.p12" "$(TargetDir)data" /i /e /y /q</PostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>echo Pre-build actions...
+DEL /f /s /q "$(TargetDir)data"</PreBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

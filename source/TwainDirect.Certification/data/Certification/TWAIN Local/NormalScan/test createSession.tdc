@@ -1,0 +1,166 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Test createSession
+; Exercise the createSession command.  We're going to do the following:
+; - confirm that commands report invalidState when called before createSession
+; - confirm that createSession succeeds, and contains all required properties
+; - confirm that createSession reports busy now, and others report invalidState
+;
+; Arguments
+; (none)
+;
+; Locals
+; createsessionresult - result of the test
+; waitforeventsresult - result of waitForEvents command
+;
+; returns: pass or fail
+;
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Display the banner...
+;
+echo
+echo 'Test createSession v1.0 21-Jul-2017'
+set createsessionresult 'pass'
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Make sure that commands prior to a successful createSession return invalidSessionId.  We don't do
+; waitForEvents here, because any complaint has to come back asynchronously.  invalidSessionId takes
+; precedence over invalidState, because in order to figure out what state we're in, we have to know
+; what session we belong to.
+;
+call CHECKINVALIDSESSIONID 'TL.NSCN.CREA.001' 'getSession'
+call CHECKINVALIDSESSIONID 'TL.NSCN.CREA.002' 'sendTask' '{}'
+call CHECKINVALIDSESSIONID 'TL.NSCN.CREA.003' 'startCapturing'
+call CHECKINVALIDSESSIONID 'TL.NSCN.CREA.004' 'readImageBlockMetadata' '1' 'false'
+call CHECKINVALIDSESSIONID 'TL.NSCN.CREA.005' 'readImageBlock' '1' 'false'
+call CHECKINVALIDSESSIONID 'TL.NSCN.CREA.006' 'releaseImageBlocks' '1' '1'
+call CHECKINVALIDSESSIONID 'TL.NSCN.CREA.007' 'stopCapturing'
+call CHECKINVALIDSESSIONID 'TL.NSCN.CREA.008' 'closeSession'
+call CHECKINVALIDSESSIONID 'TL.NSCN.CREA.009' 'invalidCommand'
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Now do this test with waitForEvents
+;
+call WAITFOREVENTSCHECKINVALIDSESSIONID
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Call createSession, and check the return properties...
+;
+call CREATESESSION
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Check the codes, we're looking for commands that must return busy and invalidState
+;
+run 'function CheckCode' 'TL.NSCN.CREA.021' 'createsessionresult' 'createSession' 'busy'
+run 'function CheckCode' 'TL.NSCN.CREA.022' 'createsessionresult' 'readImageBlockMetadata' 'invalidState' '1' 'false'
+run 'function CheckCode' 'TL.NSCN.CREA.023' 'createsessionresult' 'readImageBlock' 'invalidState' '1' 'false'
+run 'function CheckCode' 'TL.NSCN.CREA.024' 'createsessionresult' 'releaseImageBlocks' 'invalidState' '1' '1'
+run 'function CheckCode' 'TL.NSCN.CREA.025' 'createsessionresult' 'stopCapturing' 'invalidState'
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Bye-bye...
+;
+echopassfail 'SUMMARY' '${get:createsessionresult}'
+return '${get:createsessionresult}'
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; CHECKINVALIDSESSIONID
+; arg:1 - title of the test
+; arg:2 - command to run
+; arg:3 - argument to the command
+; arg:4 - argument to the command
+; arg:5 - argument to the command
+; arg:6 - argument to the command
+; returns pass or fail
+;
+:CHECKINVALIDSESSIONID
+;
+; Send the command...
+twainlocalsession 'create'
+'${arg:2}' '${arg:3}' '${arg:4}' '${arg:5}' '${arg:6}'
+twainlocalsession 'destroy'
+;
+; Check the result (empty string means we had no session)...
+if '${rj:results.success}' == '' goto CHECKINVALIDSESSIONID.PASSSTATUS
+if '${rj:results.success}' != 'false' goto CHECKINVALIDSESSIONID.FAILSTATUS
+if '${rj:results.code}' != 'invalidSessionId' goto CHECKINVALIDSESSIONID.FAILCODE
+;
+; We're good...
+:CHECKINVALIDSESSIONID.PASSSTATUS
+echopassfail '${arg:1}: invalidSessionId ${arg:2}' 'pass'
+return 'pass'
+;
+:CHECKINVALIDSESSIONID.FAILSTATUS
+echopassfail '${arg:1}: invalidSessionId ${arg:2}' 'fail (success not false)'
+set createsessionresult 'fail'
+return 'fail'
+;
+:CHECKINVALIDSESSIONID.FAILCODE
+echopassfail '${arg:1}: invalidSessionId ${arg:2}' 'fail (code not invalidSessionId)'
+set createsessionresult 'fail'
+return 'fail'
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; WAITFOREVENTSCHECKINVALIDSESSIONID
+; arg:1 - title of the test
+; returns pass or fail
+;
+:WAITFOREVENTSCHECKINVALIDSESSIONID
+;
+; Send the command...
+set waitforeventsresult 'fail'
+twainlocalsession 'create'
+waitForEvents 'test waitForEvents' 'checkinvalidsessionid' 'waitforeventsresult'
+sleep 5000
+twainlocalsession 'destroy'
+if '${get:waitforeventsresult}' != 'pass' goto WAITFOREVENTSCHECKINVALIDSESSIONID.FAIL
+; We're good...
+return 'pass'
+;
+; We're not so good...
+:WAITFOREVENTSCHECKINVALIDSESSIONID.FAIL
+set createsessionresult 'fail'
+return 'fail'
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; CREATESESSION
+; returns pass or fail
+;
+:CREATESESSION
+;
+; Send the command...
+createSession
+;
+; Check the headers...
+run 'function CheckHeader' 'TL.NSCN.CREA.010' 'createsessionresult' 'Content-Type' ~contains 'application/json' 'charset=utf-8'
+run 'function CheckHeader' 'TL.NSCN.CREA.011' 'createsessionresult' 'Content-Length' == '${rdata:#}'
+;
+; Check the mandatory properties...
+run 'function CheckJsonProperty' 'TL.NSCN.CREA.012' 'createsessionresult' 'kind' == 'twainlocalscanner'
+run 'function CheckJsonProperty' 'TL.NSCN.CREA.013' 'createsessionresult' 'commandId'
+run 'function CheckJsonProperty' 'TL.NSCN.CREA.014' 'createsessionresult' 'method' == 'createSession'
+run 'function CheckJsonProperty' 'TL.NSCN.CREA.015' 'createsessionresult' 'results'
+run 'function CheckJsonProperty' 'TL.NSCN.CREA.016' 'createsessionresult' 'results.success' == 'true'
+run 'function CheckJsonProperty' 'TL.NSCN.CREA.017' 'createsessionresult' 'results.session'
+run 'function CheckJsonProperty' 'TL.NSCN.CREA.018' 'createsessionresult' 'results.session.sessionId' != ''
+run 'function CheckJsonProperty' 'TL.NSCN.CREA.019' 'createsessionresult' 'results.session.revision' == '1'
+run 'function CheckJsonProperty' 'TL.NSCN.CREA.020' 'createsessionresult' 'results.session.state' == 'ready'
+return '${get:createsessionresult}'

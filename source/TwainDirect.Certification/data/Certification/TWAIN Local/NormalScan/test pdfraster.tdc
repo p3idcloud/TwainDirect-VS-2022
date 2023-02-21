@@ -1,0 +1,45 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Test PDF/raster
+; Go into the images folder and validate every .pdf file...
+;
+; Arguments
+; arg:1 - scanner to use
+;
+; Locals
+; pdfrasterresult - result of the test
+;
+; returns: pass or fail
+;
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Display the banner...
+;
+echo
+echo 'Test PDF/raster v1.0 31-Jul-2017'
+set pdfrasterresult 'pass'
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Figure out if we are TWAIN Local or TWAIN Cloud
+;
+if '${arg:1}' ~contains 'local:' goto MAIN.CHECKPDFRASTERLOCAL
+goto MAIN.CHECKPDFRASTERCLOUD
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Do the check in the image folder, cloud also checks for encryption
+;
+:MAIN.CHECKPDFRASTERLOCAL
+checkpdfraster
+goto MAIN.CHECKPDFRASTERRESULT
+:MAIN.CHECKPDFRASTERCLOUD
+checkpdfraster '' checkforencryption
+:MAIN.CHECKPDFRASTERRESULT
+set pdfrasterresult '${ret:}'
+echopassfail 'TL.PDFR.FILE.001: checkpdfraster' '${get:pdfrasterresult}'
+echopassfail 'SUMMARY' '${get:pdfrasterresult}'
+return '${get:pdfrasterresult}'

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+
+  <?include Details.wxi ?>
+  
+  <Fragment>
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="ApplicationProgramsFolder" Name="$(var.ProductName)">
+          <Component Id="applicationShortcut" Guid="{D5E2BA02-109A-4608-9108-9A76B01A6528}">
+            <!--Shortcut Id="ApplicationStartMenuShortcut"
+                      Name="$(var.ProductName)"
+                      Description="$(var.ProductName)"
+                      Target="[!TwainDirect.Certification.exe]"
+                      WorkingDirectory="INSTALLFOLDER"
+                      Icon ="twain.ico" /-->
+            <RemoveFolder Id="RemoveApplicationProgramsFolder" Directory="ApplicationProgramsFolder" On="uninstall"/>
+            <RegistryValue Root="HKCU" Key="Software\$(var.Manufacturer)\$(var.ProductName)" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
+          </Component>
+        </Directory>
+      </Directory>
+
+      <Directory Id="$(var.PlatformProgramFilesFolder)">
+        <Directory Id="INSTALLFOLDER" Name="TWAIN Direct Certification">
+
+          
+
+
+         
+
+         
+
+        
+         
+
+          
+
+       
+          <Component Id="TwainDirect.Support.dll" Guid="{0D2E9583-2205-4413-82CC-55D897B6369A}">
+            <File Id="TwainDirect.Support.dll" Source="$(var.TwainDirect.Certification.TargetDir)\TwainDirect.Support.dll" KeyPath="yes" />
+          </Component>
+
+          <?if $(var.Platform) = x64 ?>
+          <Component Id="vcruntime140.dll" Guid="{97D60500-F26C-4BD6-8881-E22F9D166CE7}">
+            <File Id="vcruntime140.dll.x64" Source="$(var.LibFolder)\Runtime\x64\vcruntime140.dll" KeyPath="yes" />
+          </Component>
+          <?else ?>
+          <Component Id="vcruntime140.dll" Guid="{0B82614C-A715-47DA-978C-4663BB739B5F}">
+            <File Id="vcruntime140.dll.x86" Source="$(var.LibFolder)\Runtime\x86\vcruntime140.dll" KeyPath="yes" />
+          </Component>
+          <?endif ?>
+
+          <Component Id="VC_redist.x64.exe" Guid="{8C7B5ABF-59CF-4629-876B-82534E5F79B9}">
+            <File Id="VC_redist.x64.exe" Source="$(var.LibFolder)\Runtime\x64\VC_redist.x64.exe" KeyPath="yes" />
+          </Component>
+
+          <Component Id="VC_redist.x86.exe" Guid="{E0FF4EE3-80A8-47A0-A741-37AE215CA0A2}">
+            <File Id="VC_redist.x86.exe" Source="$(var.LibFolder)\Runtime\x86\VC_redist.x86.exe" KeyPath="yes" />
+          </Component>
+
+        </Directory>
+      </Directory>
+    </Directory>
+    
+	</Fragment>
+</Wix>

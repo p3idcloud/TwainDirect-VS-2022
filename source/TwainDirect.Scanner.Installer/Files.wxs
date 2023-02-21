@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
+		 xmlns:iis="http://schemas.microsoft.com/wix/IIsExtension">
+
+  <?include Details.wxi ?>
+  
+  <Fragment>
+
+    <Directory Id="TARGETDIR" Name="SourceDir"> 
+      
+      <Directory Id="ProgramMenuFolder">
+        <Directory Id="ApplicationProgramsFolder" Name="$(var.ProductName)">
+          <Component Id="applicationShortcut" Guid="{129B0AA5-4C9B-49DD-AA17-F05ECA8ED0A8}">
+            <Shortcut Id="ApplicationStartMenuShortcut"
+                      Name="$(var.ProductName)"
+                      Description="$(var.ProductName)"
+                      Target="[!TwainDirect.Scanner.exe]"
+                      WorkingDirectory="INSTALLFOLDER"
+                      Icon ="twain.ico" />
+            <RemoveFolder Id="RemoveApplicationProgramsFolder" Directory="ApplicationProgramsFolder" On="uninstall"/>
+            <RegistryValue Root="HKCU" Key="Software\$(var.Manufacturer)\$(var.ProductName)" Name="installed" Type="integer" Value="1" KeyPath="yes"/>
+          </Component>
+        </Directory>
+      </Directory>
+
+      <Directory Id="$(var.PlatformProgramFilesFolder)">
+        <Directory Id="INSTALLFOLDER" Name="TWAIN Direct Scanner">
+
+          <Component Id="BouncyCastle.Crypto.dll" Guid="{8A9F17B5-F4DD-443A-80CB-1108AFB9427F}">
+            <File Id="BouncyCastle.Crypto.dll" Source="$(var.TwainDirect.Scanner.TargetDir)\BouncyCastle.Crypto.dll" KeyPath="yes" />
+          </Component>
+
+          <Component Id="EntityFramework.dll" Guid="{A83BF464-206B-4DB5-8DE0-81FAD6157268}">
+            <File Id="EntityFramework.dll" Source="$(var.TwainDirect.Scanner.TargetDir)\EntityFramework.dll" KeyPath="yes" />
+          </Component>
+
+          <Component Id="EntityFramework.SqlServer.dll" Guid="{465A4502-C416-41D2-848E-22DAC164B236}">
+            <File Id="EntityFramework.SqlServer.dll" Source="$(var.TwainDirect.Scanner.TargetDir)\EntityFramework.SqlServer.dll" KeyPath="yes" />
+          </Component>
+
+          <Component Id="HazyBits.Twain.Cloud.dll" Guid="{2A97F101-0250-43D8-988F-FB0F46F56A3A}">
+            <File Id="HazyBits.Twain.Cloud.dll" Source="$(var.TwainDirect.Scanner.TargetDir)\HazyBits.Twain.Cloud.dll" KeyPath="yes" />
+          </Component>
+
+          <Component Id="HazyBits.Twain.Cloud.Forms.dll" Guid="{80084ACB-6C2B-4C58-9CF6-F83B0863C153}">
+            <File Id="HazyBits.Twain.Cloud.Forms.dll" Source="$(var.TwainDirect.Scanner.TargetDir)\HazyBits.Twain.Cloud.Forms.dll" KeyPath="yes" />
+          </Component>
+
+          <?if $(var.Platform) = x64 ?>       
+            <Component Id="libcrypto_1_1.dll" Guid="{37CA5D6A-C73B-4AE5-8C2A-DB4C2CA23368}">
+              <File Id="libcrypto_1_1.dll" Source="$(var.TwainDirect.Scanner.TargetDir)\libcrypto-1_1-x64.dll" KeyPath="yes" />
+            </Component>  
+          <?else ?>
+            <Component Id="libcrypto_1_1.dll" Guid="{BE163ED9-F2B9-4117-BFEF-B669EEDBBD70}">
+              <File Id="libcrypto_1_1.dll" Source="$(var.TwainDirect.Scanner.TargetDir)\libcrypto-1_1.dll" KeyPath="yes" />
+            </Component>  
+          <?endif ?>
+
+          <?if $(var.Platform) = x64 ?>       
+            <Component Id="libssl_1_1.dll" Guid="{8447EDA2-31C6-412E-B5B6-4E2DA6D08BC9}">
+              <File Id="libssl_1_1_x64.dll" Source="$(var.TwainDirect.Scanner.TargetDir)\libssl-1_1-x64.dll" KeyPath="yes" />
+            </Component>
+          <?else ?>
+            <Component Id="libssl_1_1.dll" Guid="{3CDCB530-F71F-4140-BC00-3D1B0A312D63}">
+              <File Id="libssl_1_1_x64.dll" Source="$(var.TwainDirect.Scanner.TargetDir)\libssl-1_1.dll" KeyPath="yes" />
+            </Component>
+          <?endif ?>
+
+          <Component Id="MQTTnet.dll" Guid="{FF03200C-2BC6-46D3-A131-2790398C48FA}">
+            <File Id="MQTTnet.dll" Source="$(var.TwainDirect.Scanner.TargetDir)\MQTTnet.dll" KeyPath="yes" />
+          </Component>
+
+          <Component Id="Newtonsoft.Json.dll" Guid="{C90F8D45-AB94-4E1D-8EEC-3B001103E1E4}">
+            <File Id="Newtonsoft.Json.dll" Source="$(var.TwainDirect.Scanner.TargetDir)\Newtonsoft.Json.dll" KeyPath="yes" />
+          </Component>
+
+          <Component Id="pdfras_reader_managed.dll" Guid="{3B28FAE7-BC20-4F8C-8D83-238AA67FF6B5}">
+            <File Id="pdfras_reader_managed.dll" Source="$(var.TwainDirect.Scanner.TargetDir)\pdfras_reader_managed.dll" KeyPath="yes" />
+          </Component>
+          
+          <Component Id="pdfras_writer_managed.dll" Guid="{3ED5AF4B-5D86-44F2-B823-D5D0DB11B0D8}">
+            <File Id="pdfras_writer_managed.dll" Source="$(var.TwainDirect.Scanner.TargetDir)\pdfras_writer_managed.dll" KeyPath="yes" />
+          </Component>
+          
+          <Component Id="pdfras_digitalsignature.dll" Guid="{CA1B1C4F-0BA2-4414-A058-2AC92B11906D}">
+            <File Id="pdfras_digitalsignature.dll" Source="$(var.TwainDirect.Scanner.TargetDir)\pdfras_digitalsignature.dll" KeyPath="yes" />
+          </Component>
+          
+          <Component Id="pdfras_encryption.dll" Guid="{BFDAC475-C9D9-4C6A-8DC9-5B64CB35B169}">
+            <File Id="pdfras_encryption.dll" Source="$(var.TwainDirect.Scanner.TargetDir)\pdfras_encryption.dll" KeyPath="yes" />
+          </Component>
+
+          <Component Id="SQLite.CodeFirst.dll" Guid="{DA349446-AF83-477E-8784-ADCAFD4D6128}">
+            <File Id="SQLite.CodeFirst.dll" Source="$(var.TwainDirect.Scanner.TargetDir)\SQLite.CodeFirst.dll" KeyPath="yes" />
+          </Component>
+
+          <Directory Id="INSTALLFOLDERX86" Name="x86">
+            <Component Id="SQLite.Interop.dll.x86" Guid="{09A46DA7-BC25-467F-B454-9E27FEF9006B}">
+              <File Id="SQLite.Interop.dll.x86" Source="$(var.TwainDirect.Scanner.TargetDir)\x86\SQLite.Interop.dll" KeyPath="yes" />
+            </Component>
+          </Directory>
+
+          <Directory Id="INSTALLFOLDERX64" Name="x64">
+            <Component Id="SQLite.Interop.dll.x64" Guid="{5227FC6B-C286-4D5C-9D45-DA6A4F0207F5}">
+              <File Id="SQLite.Interop.dll.x64" Source="$(var.TwainDirect.Scanner.TargetDir)\x64\SQLite.Interop.dll" KeyPath="yes" />
+            </Component>
+          </Directory>
+
+          <Component Id="System.Data.SQLite.dll" Guid="{CD3186D7-EABD-443B-AA1E-B669C20F4E56}">
+            <File Id="System.Data.SQLite.dll" Source="$(var.TwainDirect.Scanner.TargetDir)\System.Data.SQLite.dll" KeyPath="yes" />
+          </Component>
+
+          <Component Id="System.Data.SQLite.EF6.dll" Guid="{BE059943-C925-4503-8AE0-10E976E4ED4D}">
+            <File Id="System.Data.SQLite.EF6.dll" Source="$(var.TwainDirect.Scanner.TargetDir)\System.Data.SQLite.EF6.dll" KeyPath="yes" />
+          </Component>
+
+          <Component Id="System.Data.SQLite.Linq.dll" Guid="{CEBB41D5-6DCA-4A6C-BAD2-956EF5E467DF}">
+            <File Id="System.Data.SQLite.Linq.dll" Source="$(var.TwainDirect.Scanner.TargetDir)\System.Data.SQLite.Linq.dll" KeyPath="yes" />
+          </Component>
+
+          <Component Id="System.Net.Http.Formatting.dll" Guid="{D4A268A3-1B10-40D3-BE5C-83FCDADC5F22}">
+            <File Id="System.Net.Http.Formatting.dll" Source="$(var.TwainDirect.Scanner.TargetDir)\System.Net.Http.Formatting.dll" KeyPath="yes" />
+          </Component>
+
+	        <Component Id="TwainDirect.Scanner.exe" Guid="{8BA908AD-DFB4-4BC6-9132-5028E90CC6D5}">
+            <File Id="TwainDirect.Scanner.exe" Source="$(var.TwainDirect.Scanner.TargetDir)\TwainDirect.Scanner.exe" KeyPath="yes" />
+          </Component>
+
+          <Component Id="TwainDirect.Scanner.exe.config" Guid="{B0CD6476-8A29-4B01-A611-60F798604876}">
+            <File Id="TwainDirect.Scanner.exe.config" Source="$(var.TwainDirect.Scanner.TargetDir)\TwainDirect.Scanner.exe.config" KeyPath="yes" />
+          </Component>
+
+          <Component Id="TwainDirect.OnTwain.exe" Guid="{7263CF35-D722-4B29-90F4-1D7A9ED3BEA3}">
+            <File Id="TwainDirect.OnTwain.exe" Source="$(var.TwainDirect.Scanner.TargetDir)\TwainDirect.OnTwain.exe" KeyPath="yes" />
+          </Component>
+
+          <Component Id="TwainDirect.OnTwain.exe.config" Guid="{C26B2610-C50D-4018-8469-EC9BEE70BE98}">
+            <File Id="TwainDirect.OnTwain.exe.config" Source="$(var.TwainDirect.Scanner.TargetDir)\TwainDirect.OnTwain.exe.config" KeyPath="yes" />
+          </Component>
+
+          <Component Id="TwainDirect.Scanner.TwainLocalManager.exe" Guid="{4B80CAF3-2945-4A56-9327-40784F954D6E}">
+            <File Id="TwainDirect.Scanner.TwainLocalManager.exe" Source="$(var.TwainDirect.Scanner.TargetDir)\TwainDirect.Scanner.TwainLocalManager.exe" KeyPath="yes" />
+          </Component>
+
+          <Component Id="TwainDirect.Scanner.TwainLocalManager.exe.config" Guid="{44A2A17C-E092-4EB2-926A-0A5BB5AD9F4E}">
+            <File Id="TwainDirect.Scanner.TwainLocalManager.exe.config" Source="$(var.TwainDirect.Scanner.TargetDir)\TwainDirect.Scanner.TwainLocalManager.exe.config" KeyPath="yes" />
+          </Component>
+
+          <Component Id="TwainDirect.Support.dll" Guid="{00E26F5A-F175-45AD-8C81-AAE5F82A6972}">
+            <File Id="TwainDirect.Support.dll" Source="$(var.TwainDirect.Scanner.TargetDir)\TwainDirect.Support.dll" KeyPath="yes" />
+          </Component>
+
+          <?if $(var.Platform) = x64 ?>
+            <Component Id="vcruntime140.dll" Guid="{C1AEA2BD-E303-46EA-AD84-188743206436}">
+              <File Id="vcruntime140.dll.x64" Source="$(var.LibFolder)\Runtime\x64\vcruntime140.dll" KeyPath="yes" />
+            </Component>
+          <?else ?>
+            <Component Id="vcruntime140.dll" Guid="{B6833713-8724-4265-B0CE-070FCA310429}">
+              <File Id="vcruntime140.dll.x86" Source="$(var.LibFolder)\Runtime\x86\vcruntime140.dll" KeyPath="yes" />
+            </Component>          
+          <?endif ?>
+
+          <Component Id="VC_redist.x64.exe" Guid="{70C637FC-47C0-4BDB-89A0-4E151012569F}">
+            <File Id="VC_redist.x64.exe" Source="$(var.LibFolder)\Runtime\x64\VC_redist.x64.exe" KeyPath="yes" />
+          </Component>
+
+          <Component Id="VC_redist.x86.exe" Guid="{3380B0A0-273F-4B68-B99C-B31220A59290}">
+            <File Id="VC_redist.x86.exe" Source="$(var.LibFolder)\Runtime\x86\VC_redist.x86.exe" KeyPath="yes" />
+          </Component>
+          
+        </Directory>
+      </Directory>
+    </Directory>
+
+  </Fragment>
+</Wix>

@@ -1,0 +1,119 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Test releaseImageBlocks
+; Exercise the releaseImageBlocks command.  We're going to do the following:
+; - confirm that releaseImageBlocks succeeds, and contains all required properties
+;
+; Arguments
+; arg:1 - first imageblock to remove, inclusive
+; arg:2 - last imageblock to remvoe, inclusive
+; arg:3 - [OUT] set tag to true, if done
+; arg:4 - [OUT] set tag to first image block, if we have one
+; arg:5 - expected session state
+; arg:6 - expected session state
+; arg:7 - expected session state
+;
+; Locals
+; releaseimageblocksresult - result of the test
+;
+; returns: pass or fail
+;
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Display the banner...
+;
+echo
+echo 'Test releaseImageBlocks v1.0 17-Jul-2017'
+set releaseimageblocksresult 'pass'
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Call releaseImageBlocks, and check the return properties...
+;
+call RELEASEIMAGEBLOCKS '${arg:1}' '${arg:2}' '${arg:3}' '${arg:4}' '${arg:5}' '${arg:6}' '${arg:7}'
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Bye-bye...
+;
+echopassfail 'SUMMARY' '${get:releaseimageblocksresult}'
+return '${get:releaseimageblocksresult}'
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; RELEASEIMAGEBLOCKS
+; arg:1 - first imageblock to remove, inclusive
+; arg:2 - last imageblock to remvoe, inclusive
+; arg:3 - [OUT] set tag to true, if done
+; arg:4 - [OUT] set tag to first imaage block, if we have one
+; arg:5 - expected session state
+; arg:6 - expected session state
+; arg:7 - expected session state
+; returns pass or fail
+;
+:RELEASEIMAGEBLOCKS
+;
+; Send the command...
+releaseImageBlocks '${arg:1}' '${arg:2}'
+;
+; Check the headers...
+run 'function CheckHeader' 'TL.NSCN.RLIB.001' 'releaseimageblocksresult' 'Content-Type' ~contains 'application/json' 'charset=utf-8'
+run 'function CheckHeader' 'TL.NSCN.RLIB.002' 'releaseimageblocksresult' 'Content-Length' == '${rdata:#}'
+;
+; Check the mandatory properties...
+run 'function CheckJsonProperty' 'TL.NSCN.RLIB.003' 'releaseimageblocksresult' 'kind' == 'twainlocalscanner'
+run 'function CheckJsonProperty' 'TL.NSCN.RLIB.004' 'releaseimageblocksresult' 'commandId'
+run 'function CheckJsonProperty' 'TL.NSCN.RLIB.005' 'releaseimageblocksresult' 'method' == 'releaseImageBlocks'
+run 'function CheckJsonProperty' 'TL.NSCN.RLIB.006' 'releaseimageblocksresult' 'results'
+run 'function CheckJsonProperty' 'TL.NSCN.RLIB.007' 'releaseimageblocksresult' 'results.success' == 'true'
+run 'function CheckJsonProperty' 'TL.NSCN.RLIB.008' 'releaseimageblocksresult' 'results.session'
+run 'function CheckJsonProperty' 'TL.NSCN.RLIB.009' 'releaseimageblocksresult' 'results.session.sessionId' != ''
+run 'function CheckJsonProperty' 'TL.NSCN.RLIB.010' 'releaseimageblocksresult' 'results.session.revision' != ''
+run 'function CheckJsonProperty' 'TL.NSCN.RLIB.011' 'releaseimageblocksresult' 'results.session.state' == '${arg:5}' '${arg:6}' '${arg:7}'
+if '${get:releaseimageblocksresult}' != 'pass' goto RELEASEIMAGEBLOCKS.FAIL
+;
+; We're good, check if we need to output values...
+call RETURNVALUES '${arg:3}' '${arg:4}'
+return 'pass'
+;
+; No joy...
+:RELEASEIMAGEBLOCKS.FAIL
+set releaseimageblocksresult 'fail'
+return 'fail'
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; RETURNVALUES
+; arg:1 - [OUT] set tag to true, if done
+; arg:2 - [OUT] set tag to first imaage block, if we have one
+; return pass
+;
+:RETURNVALUES
+;
+; If we don't have arg:1, we're done...
+if '${arg:1}' == '') goto RETURNVALUES.DONE
+;
+; We're done if our state isn't capturing, or if the
+; flag tells us we've drained the scanner...
+set '${arg:1}' true
+if '${rj:results.session.state}' == 'capturing' goto RETURNVALUES.GOODSTATE
+if '${rj:results.session.state}' == 'draining' goto RETURNVALUES.GOODSTATE
+if '${rj:results.session.state}' == 'closed' goto RETURNVALUES.GOODSTATE
+:RETURNVALUES.GOODSTATE
+if '${rj:results.session.imageBlocksDrained}' == 'true' goto RETURNVALUES.DONE
+set '${arg:1}' false
+;
+; If we don't have arg:2, we're done...
+if '${arg:2}' == '') goto RETURNVALUES.DONE
+;
+; Get the first image block, if there is one...
+set '${arg:2}' '${rj:results.session.imageBlocks[0]}'
+;
+; bye-bye...
+:RETURNVALUES.DONE
+return 'pass'

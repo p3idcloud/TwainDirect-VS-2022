@@ -1,0 +1,82 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Test closeSession
+; Exercise the closeSession command.  We're going to do the following:
+; - confirm that closeSession succeeds, and contains all required properties
+;
+; Arguments
+; arg:1 - [OUT] set tag to true, if done
+; arg:2 - state to check for
+; arg:3 - state to check for
+;
+; Locals
+; closesessionresult - result of the test
+;
+; returns: pass or fail
+;
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Display the banner...
+;
+echo
+echo 'Test closeSession v1.0 21-Jul-2017'
+set closesessionresult 'pass'
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Call closeSession, and check the return properties...
+;
+call CLOSESESSION '${arg:1}' '${arg:2}'
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Bye-bye...
+;
+echopassfail 'SUMMARY' '${get:closesessionresult}'
+return '${get:closesessionresult}'
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; CLOSESESSION
+; arg:1 - [OUT] set tag to true, if done
+; arg:2 - state to check for
+; arg:3 - state to check for
+; returns pass or fail
+;
+:CLOSESESSION
+;
+; Send the command...
+closeSession
+;
+; Check the headers...
+run 'function CheckHeader' 'TL.NSCN.CLOS.001' 'closesessionresult' 'Content-Type' ~contains 'application/json' 'charset=utf-8'
+run 'function CheckHeader' 'TL.NSCN.CLOS.002' 'closesessionresult' 'Content-Length' == '${rdata:#}'
+;
+; Check the mandatory properties...
+run 'function CheckJsonProperty' 'TL.NSCN.CLOS.003' 'closesessionresult' 'kind' == 'twainlocalscanner'
+run 'function CheckJsonProperty' 'TL.NSCN.CLOS.004' 'closesessionresult' 'commandId'
+run 'function CheckJsonProperty' 'TL.NSCN.CLOS.005' 'closesessionresult' 'method' == 'closeSession'
+run 'function CheckJsonProperty' 'TL.NSCN.CLOS.006' 'closesessionresult' 'results'
+run 'function CheckJsonProperty' 'TL.NSCN.CLOS.007' 'closesessionresult' 'results.success' == 'true'
+run 'function CheckJsonProperty' 'TL.NSCN.CLOS.008' 'closesessionresult' 'results.session'
+run 'function CheckJsonProperty' 'TL.NSCN.CLOS.009' 'closesessionresult' 'results.session.sessionId' != ''
+run 'function CheckJsonProperty' 'TL.NSCN.CLOS.010' 'closesessionresult' 'results.session.revision' != ''
+run 'function CheckJsonProperty' 'TL.NSCN.CLOS.011' 'closesessionresult' 'results.session.state' == '${arg:2}' '${arg:3}'
+if '${get:closesessionresult}' != 'pass' goto CLOSESESSION.FAIL
+;
+; We're good...
+set '${arg:1}' true
+if '${rj:results.session.imageBlocksDrained}' == 'true' goto RETURNVALUES.DRAINED
+set '${arg:1}' false
+:RETURNVALUES.DRAINED
+return 'pass'
+;
+; No joy...
+:CLOSESESSION.FAIL
+set '${arg:1}' true
+set closesessionresult 'fail'
+return 'fail'

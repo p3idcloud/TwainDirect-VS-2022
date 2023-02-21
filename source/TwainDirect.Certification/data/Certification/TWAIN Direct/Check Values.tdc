@@ -1,0 +1,358 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Check Values
+; Prove that the scanner allows the task to override the stream, source, and pixelFormat names.
+;
+; Try various configurations to see if we can confirm that the scanner is capable of responding with
+; a resolution in the reply task.  We assume fail unless we get a successful response.
+;
+; Arguments
+; arg:1 - scanner to test
+;
+; Locals
+; name - name of the test
+; test - task to test
+; success - expected value of success
+; key - key to test
+; value - expected value of key
+; localresult - result of test
+;
+; returns: pass or fail
+;
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Initialize...
+;
+call INITIALIZE 'Check Values v1.0 15-Sep-2017' '${arg:1}'
+if '${ret:}' != 'true' goto MAIN.ERROR
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Demonstrate that the stream name can be overridden (that it's not forced to be 'stream#').
+;
+set name    'TD.CHVL.NAME.001: override stream name'
+set test    '{"actions":[{"action":"configure","streams":[{"name":"override","sources":[{"source":"any"}]}]}]}'
+set success 'true'
+set key     'results.session.task.actions[0].streams[0].name'
+set value   'override'
+call CHECKKEYVALUE '${get:name}' '${get:test}' '${get:success}' '${get:key}' '${get:value}'
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Demonstrate that the source name can be overridden (that it's not forced to be 'source#').
+;
+set name    'TD.CHVL.NAME.002: override source name'
+set test    '{"actions":[{"action":"configure","streams":[{"sources":[{"source":"any","name":"override"}]}]}]}'
+set success 'true'
+set key     'results.session.task.actions[0].streams[0].sources[0].name'
+set value   'override'
+call CHECKKEYVALUE '${get:name}' '${get:test}' '${get:success}' '${get:key}' '${get:value}'
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Demonstrate that the pixelFormat name can be overridden (that it's not forced to be 'pixelFormat#').
+;
+set name    'TD.CHVL.NAME.003: override pixelFormat name'
+set test    '{"actions":[{"action":"configure","streams":[{"sources":[{"source":"any","name":"override","pixelFormats":[{"pixelFormat":"any","name":"override"}]}]}]}]}'
+set success 'true'
+set key     'results.session.task.actions[0].streams[0].sources[0].pixelFormats[0].name'
+set value   'override'
+call CHECKKEYVALUE '${get:name}' '${get:test}' '${get:success}' '${get:key}' '${get:value}'
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Attempt to get the resolution reported in the reply task.  Provide a list of resolutions, starting
+; with an illegal value.  If resolution is not reported in the reply task, skip this test.  If it is
+; reported the value must match one of the ones sent in the task.
+;
+set name    'TD.CHVL.RESL.001: resolution'
+set test    '{"actions":[{"action":"configure","streams":[{"sources":[{"source":"any","pixelFormats":[{"pixelFormat":"any","attributes":[{"attribute":"resolution","values":[{"value":-1},{"value":1},{"value":50},{"value":75},{"value":100},{"value":200},{"value":300},{"value":600},{"value":1200},{"value":2400},{"value":4800},{"value":9600}]}]}]}]}]}]}'
+set success 'true'
+set key     'results.session.task.actions[0].streams[0].sources[0].pixelFormats[0].attributes[0].values[0].value'
+set bad0    '-1'
+set good0   '1'
+set good1   '50'
+set good2   '75'
+set good3   '100'
+set good4   '200'
+set good5   '300'
+set good6   '600'
+set good7   '1200'
+set good8   '2400'
+set good9   '4800'
+set good10  '9600'
+call CHECKBADGOODVALUES '${get:name}' '${get:test}' '${get:success}' '${get:key}' 'bad' 'good'
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Summary and cleanup...
+;
+; Did we pass?
+echopassfail 'SUMMARY' '${get:localresult}'
+;
+; Close the session...
+echo 'CMD: closeSession'
+closeSession
+;
+; All done with the good code path...
+echo 'Done...'
+return '${get:localresult}'
+;
+; Ruh-roh...
+:MAIN.ERROR
+echopassfail 'SUMMARY' 'error'
+echo 'Done with unexpected error, check the logs...'
+return 'fail'
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Function: Initialize
+; arg:1 - name of this test suite
+; arg:2 - scanner to test
+; returns: true or false
+;
+:INITIALIZE
+;
+echo.yellow
+echo.yellow
+echo.yellow
+echo.yellow '********************************************************************************'
+echo.yellow '${arg:1}'
+;
+; Pick a scanner, default to the first scanner if we
+; don't get one...
+select '${arg:2}'
+if '${ret:}' != 'true' goto INITIALIZE.ERROR
+;
+; Get the scanner info, including its x-privet-token...
+echo 'CMD: infoex'
+infoex
+if '${rj:x-privet-token}' == '' goto INITIALIZE.ERROR
+echo 'SCANNER:' '${rj:description}' / '${rj:name}'
+;
+; Create a new session...
+echo 'CMD: createSession'
+createSession
+if '${rj:results.success}' != 'true' goto INITIALIZE.ERROR
+if '${rj:results.session.state}' != 'ready' goto INITIALIZE.ERROR
+;
+; Wait for events (we won't get a response)...
+echo 'CMD: waitForEvents'
+waitForEvents
+;
+; Set our pass flag, and give us a blank line...
+set localresult skip
+return true
+;
+; Ruh-roh...
+:INITIALIZE.ERROR
+echo 'check that the scanner is available with the list command, and that the name for it is correct.'
+return false
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Function: Check Key Value
+;
+; Arguments
+; arg:1 - name of the test
+; arg:2 - task to test
+; arg:3 - expected value of results.success
+; arg:4 - JSON key to check
+; arg:5 - value that JSON key must have
+;
+; Locals
+; result - result of the test
+;
+; returns: pass or fail
+;
+:CHECKKEYVALUE
+;
+; Log it to make it easier to diagnose stuff...
+log info '#'
+log info '#Test:                        ${arg:1}'
+log info '#Task:                        ${arg:2}'
+log info '#Expected success:            ${arg:3}'
+log info '#Key to check:                ${arg:4}'
+log info '#Expected key value:          ${arg:5}'
+;
+; Send the command...
+sendtask '${arg:2}'
+;
+if '${rj:results.session.task.actions[0].results.success}' == '' goto CHECKKEYVALUE.FAIL
+if '${rj:results.session.task.actions[0].results.success}' != '${arg:3}' goto CHECKKEYVALUE.FAIL
+if '${rj:${arg:4}}' != '${arg:5}' goto CHECKKEYVALUE.FAIL
+;
+set result pass
+echopassfail '${arg:1}' 'pass'
+log info '#Test result:                 pass'
+return 'pass'
+;
+:CHECKKEYVALUE.FAIL
+set result fail
+set localresult fail
+echopassfail '${arg:1}' 'fail'
+log info '#Test result:                 fail'
+return 'fail'
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Function: Check Value
+;
+; Arguments
+; arg:1 - name of the test
+; arg:2 - task to test
+; arg:3 - expected value of results.success
+; arg:4 - key to check
+; arg:5 - value key must have
+;
+; Locals
+; localresult - result of the test
+;
+; returns: pass or fail
+;
+:CHECKVALUE
+;
+; Log it to make it easier to diagnose stuff...
+log info '#'
+log info '#Test:                        ${arg:1}'
+log info '#Task:                        ${arg:2}'
+log info '#Expected success:            ${arg:3}'
+log info '#Key to check:                ${arg:4}'
+log info '#Expected key value:          ${arg:5}'
+;
+; Send the command...
+sendtask '${arg:2}'
+;
+if '${rj:results.session.task.actions[0].results.success}' == '' goto CHECKVALUE.FAIL
+if '${rj:results.session.task.actions[0].results.success}' != '${arg:3}' goto CHECKVALUE.FAIL
+if '${rj:${arg:4}}' == '' goto CHECKVALUE.SKIP
+if '${rj:${arg:4}}' != '${arg:5}' goto CHECKVALUE.FAIL
+;
+if '${get:localresult}' == 'fail' goto CHECKVALUE.DONTPASS
+set localresult pass
+:CHECKVALUE.DONTPASS
+echopassfail '${arg:1}' 'pass'
+log info '#Test result:                 pass'
+return 'pass'
+;
+:CHECKVALUE.SKIP
+echopassfail '${arg:1}' 'skip'
+log info '#Test result:                 skip'
+return 'skip'
+;
+:CHECKVALUE.FAIL
+set localresult fail
+echopassfail '${arg:1}' 'fail'
+log info '#Test result:                 fail'
+return 'fail'
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Function: Check Bad Good Values
+; Check if the key is non-null (that it exists), if it does not, then
+; the test is skipped.  If it exists and it appears in the bad list
+; the test fails; if it appears in the good list, the test passes. If
+; it doesn't appear in eithere list the test fails.
+;
+; Arguments
+; arg:1 - name of the test
+; arg:2 - task to test
+; arg:3 - expected value of results.success
+; arg:4 - key to check
+; arg:5 - bad value array name
+; arg:6 - good value array name
+;
+; Locals
+; localresult - result of the test
+;
+; returns: pass or fail
+;
+:CHECKBADGOODVALUES
+;
+; Log it to make it easier to diagnose stuff...
+log info '#'
+log info '#Test:                        ${arg:1}'
+log info '#Task:                        ${arg:2}'
+log info '#Expected success:            ${arg:3}'
+log info '#Key to check:                ${arg:4}'
+;
+; Log bad and good values...
+set bb 0
+set gg 0
+:CHECKBADGOODVALUES.LOGNEXTBAD
+	if '${get:${arg:5}${get:bb}}' == '' goto CHECKBADGOODVALUES.LOGNEXTGOOD
+	log info '#bad:                         ${get:${arg:5}${get:bb}}'
+	increment bb ${get:bb} 1
+	goto CHECKBADGOODVALUES.LOGNEXTBAD
+:CHECKBADGOODVALUES.LOGNEXTGOOD
+	if '${get:${arg:6}${get:gg}}' == '' goto CHECKBADGOODVALUES.LOGDONE
+	log info '#good:                        ${get:${arg:6}${get:gg}}'
+	increment gg ${get:gg} 1
+	goto CHECKBADGOODVALUES.LOGNEXTGOOD
+:CHECKBADGOODVALUES.LOGDONE
+;
+; Send the command...
+sendtask '${arg:2}'
+;
+; Bail on errors, if the value is null, meaning that the value
+; isn't in the response, then skip it...
+if '${rj:results.session.task.actions[0].results.success}' == '' goto CHECKVALUE.FAIL
+if '${rj:results.session.task.actions[0].results.success}' != '${arg:3}' goto CHECKVALUE.FAIL
+if '${rjx:${arg:4}}' == '(null)' goto CHECKVALUE.SKIP
+;
+; A match on any bad value causes a fail...
+set bb 0
+set gg 0
+:CHECKBADGOODVALUES.CHECKNEXTBAD
+	if '${get:${arg:5}${get:bb}}' == '' goto CHECKBADGOODVALUES.CHECKNEXTGOOD
+	if '${rj:${arg:4}}' == '${get:${arg:5}${get:bb}}' goto CHECKBADGOODVALUES.FAILBAD
+	increment bb ${get:bb} 1
+	goto CHECKBADGOODVALUES.CHECKNEXTBAD
+:CHECKBADGOODVALUES.CHECKNEXTGOOD
+	if '${get:${arg:6}${get:gg}}' == '' goto CHECKBADGOODVALUES.CHECKDONE
+	if '${rj:${arg:4}}' == '${get:${arg:6}${get:gg}}' goto CHECKBADGOODVALUES.PASS
+	increment gg ${get:gg} 1
+	goto CHECKBADGOODVALUES.CHECKNEXTGOOD
+:CHECKBADGOODVALUES.CHECKDONE
+goto CHECKVALUE.FAILGOOD
+;
+if '${get:localresult}' == 'fail' goto CHECKVALUE.DONTPASS
+:CHECKBADGOODVALUES.PASS
+set localresult pass
+:CHECKVALUE.DONTPASS
+echopassfail '${arg:1}' 'pass'
+log info '#Test result:                 pass'
+return 'pass'
+;
+:CHECKVALUE.SKIP
+echopassfail '${arg:1}' 'skip'
+log info '#Test result:                 skip'
+return 'skip'
+;
+:CHECKVALUE.FAIL
+set localresult fail
+echopassfail '${arg:1}' 'fail'
+log info '#Test result:                 fail'
+return 'fail'
+;
+:CHECKVALUE.FAILBAD
+set localresult fail
+echopassfail '${arg:1}' 'fail'
+log info '#Test result:                 fail (matched ${get:${arg:5}${get:bb}}'
+return 'fail'
+;
+:CHECKVALUE.FAILGOOD
+set localresult fail
+echopassfail '${arg:1}' 'fail'
+log info '#Test result:                 fail (no matches found)'
+return 'fail'
