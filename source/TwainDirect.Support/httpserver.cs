@@ -368,7 +368,7 @@ namespace TwainDirect.Support
         /// <summary>
         /// Our listener for incoming TWAIN Direct Client-Server API commands...
         /// </summary>
-        private HttpListener m_httplistener;
+        private HttpListener m_httplistener; 
 
         /// <summary>
         /// Our current outstanding context...
