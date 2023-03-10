@@ -232,10 +232,8 @@ namespace TwainDirect.Support
 
             // Stop the listener...
             if (m_httplistener != null)
-            {
-                //StopListening();
-                _cancellationSource.Cancel();
-                ////ListenerCallback1(null);
+            {                
+                _cancellationSource.Cancel();                
                 m_httplistener.Stop();
                 m_httplistener.Close();                
                 m_httplistener = null;
