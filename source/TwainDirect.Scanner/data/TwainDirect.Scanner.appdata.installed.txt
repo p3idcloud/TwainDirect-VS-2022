@@ -96,7 +96,7 @@
 
     "commentCloudApiRoot": [
         "******************************************************************************",
-        "default: https://api-twain.hazybits.com/dev",
+        "default: https://scanbot.p3idtech.com/api",
         "Add one or more cloud api root paths for the user to select from.",
         " ",
         "available fields:",
@@ -127,11 +127,11 @@
     ],
     "XcloudApiRoot": [
         {
-            "name": "HazyBits",
-            "url": "https://twain.hazybits.com/api",
-            "manager": "https://twain.hazybits.com",
-            "signin": "google",
-            "folderName": "hazybits",
+            "name": "P3iD",
+            "url": "https://scanbot.p3idtech.com/api",
+            "manager": "https://scanbot.p3idtech.com",
+            "signin": "p3id",
+            "folderName": "scanbot",
             "useHttps": "yes"
         }
     ]
