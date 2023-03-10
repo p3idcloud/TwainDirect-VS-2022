@@ -33,12 +33,17 @@
 ///////////////////////////////////////////////////////////////////////////////////////
 
 // Helpers...
+using HazyBits.Twain.Cloud.Telemetry;
 using System;
+using System.Configuration;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Security.Permissions;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace TwainDirect.Support
 {
@@ -49,6 +54,9 @@ namespace TwainDirect.Support
         ///////////////////////////////////////////////////////////////////////////////
         #region Public Methods
 
+        CancellationToken _cancellationtoken;
+        CancellationTokenSource _cancellationSource = new CancellationTokenSource();
+       
         /// <summary>
         /// Our constructor...
         /// </summary>
@@ -110,7 +118,7 @@ namespace TwainDirect.Support
                 m_dnssd = null;
                 return (false);
             }
-
+           
             // Make a note of our callback...
             m_dispatchcommand = a_dispatchcommand;
 
@@ -129,6 +137,8 @@ namespace TwainDirect.Support
                 m_iPort = ((IPEndPoint)tcplistener.LocalEndpoint).Port;
                 tcplistener.Stop();
             }
+
+
 
             // Add our prefixes, we'll accept input from any address on this port
             // which is how the advertisement should work.  We won't register
@@ -156,19 +166,32 @@ namespace TwainDirect.Support
                 m_httplistener.Prefixes.Add(szUri);
                 szUri = @"http://+:" + m_iPort + "/privet/twaindirect/session/";
                 Log.Info("Monitoring: " + szUri);
-                m_httplistener.Prefixes.Add(szUri);
+
             }
 
-            // Start the service...
-            try
+            m_httplistener.Start();
+            Task.Run(() =>
             {
-                m_httplistener.Start();
-            }
-            catch (Exception exception)
-            {
-                Log.Error("ServerStart: Start failed..." + exception.Message);
-                return (false);
-            }
+                while (true)
+                {
+                    if (_cancellationtoken.IsCancellationRequested) return;
+                    // Start the service...            
+                    try
+                    {
+                        if (m_httplistener == null)
+                        {
+                            return;
+                        }
+                        NonblockingListener();
+                    }
+                    catch (Exception exception)
+                    {
+                        Log.Error("ServerStart: Start failed..." + exception.Message);
+                        //return (false);
+                    }
+                }
+            }, _cancellationtoken);
+          
 
             // Handle stuff async...
             m_iasyncresult = m_httplistener.BeginGetContext(new AsyncCallback(ListenerCallback), m_httplistener);
@@ -179,6 +202,13 @@ namespace TwainDirect.Support
             // All done...
             return (true);
         }
+
+        public void NonblockingListener()
+        {
+            IAsyncResult result = m_httplistener.BeginGetContext(ListenerCallback, m_httplistener);
+            result.AsyncWaitHandle.WaitOne();
+        }
+
 
         /// <summary>
         /// Stop the HTTP server...
@@ -198,16 +228,31 @@ namespace TwainDirect.Support
             if (m_iasyncresult != null)
             {
                 m_iasyncresult = null;
-            }
+            }          
 
             // Stop the listener...
             if (m_httplistener != null)
             {
+                //StopListening();
+                _cancellationSource.Cancel();
+                ////ListenerCallback1(null);
                 m_httplistener.Stop();
-                m_httplistener.Close();
+                m_httplistener.Close();                
                 m_httplistener = null;
             }
         }
+
+        public void StopListening()
+        {
+
+            _cancellationSource.Cancel();
+            ListenerCallback(null);
+
+            //_logger.LogDebug("Http Listening Stop");
+            m_httplistener.Close();
+        }
+
+       
 
         #endregion
 
@@ -287,7 +332,7 @@ namespace TwainDirect.Support
             try
             {
                 // Get our listener...
-                httplistener = (HttpListener)a_iasyncresult.AsyncState;
+                httplistener = m_httplistener; //(HttpListener)a_iasyncresult.AsyncState;
 
                 // Call EndGetContext to complete the asynchronous operation.
                 httplistenercontext = httplistener.EndGetContext(a_iasyncresult);
@@ -376,7 +421,8 @@ namespace TwainDirect.Support
         private IAsyncResult m_iasyncresult;
 
         /// <summary>
-        /// Our port...
+        /// Our 
+        /// ...
         /// </summary>
         private int m_iPort;
 

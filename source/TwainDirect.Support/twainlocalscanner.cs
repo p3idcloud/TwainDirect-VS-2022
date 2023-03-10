@@ -632,8 +632,7 @@ namespace TwainDirect.Support
                 {
                     Debug.WriteLine(message);
 
-                    Task.Run(async () =>
-                    {
+                    Task.Run(() => {
                         var cloudMessage = JsonConvert.DeserializeObject<CloudMessage>(message, CloudManager.SerializationSettings);
 
                         var context = new HttpListenerContextBase();
@@ -655,7 +654,7 @@ namespace TwainDirect.Support
 
                         var requestId = cloudMessage.Headers.FirstOrDefault(h =>
                             string.Equals(h.Key, "X-TWAIN-Cloud-Request-Id",
-                                StringComparison.InvariantCultureIgnoreCase)).Value;                            
+                                StringComparison.InvariantCultureIgnoreCase)).Value;
 
                         context.Response = new HttpListenerResponseBase(m_devicesessionCloud);
                         var responseStream = context.Response.OutputStream as ReactiveMemoryStream;
@@ -683,6 +682,7 @@ namespace TwainDirect.Support
                         };
 
                         DeviceDispatchCommandInternal(true, cloudMessage.Body, context);
+                        return Task.CompletedTask;
                     });
                 };
 
