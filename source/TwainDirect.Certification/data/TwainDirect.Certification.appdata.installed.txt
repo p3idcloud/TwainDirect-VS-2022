@@ -107,12 +107,12 @@
     ],
     "XcloudApiRoot": [
         {
-            "name": "HazyBits",
-            "url": "https://twain.hazybits.com/api",
-            "manager": "https://twain.hazybits.com",
-            "signin": "google",
-            "folderName": "hazybits",
-            "useHttps": "yes"
+            "name": "P3iD",
+            "url": "https://scanbotdemo.p3idtech.com/api",
+            "manager": "https://scanbotdemo.p3idtech.com",
+            "signin": "p3id",
+            "folderName": "scanbot",
+            "useHttps": "no"
         }
     ]
 }
